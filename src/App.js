@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { Tooltip } from 'antd';
 import { Resizable } from 'react-resizable';
 import { Table } from 'antd';
 import './index.css'
@@ -38,70 +39,93 @@ const App = () => {
       title: 'Date',
       dataIndex: 'date',
       width: 200,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (date) => <Tooltip placement="topLeft" title={date}>{date}</Tooltip>
     },
     {
       title: 'Amount',
       dataIndex: 'amount',
       width: 100,
       sorter: (a, b) => a.amount - b.amount,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (amount) => <Tooltip placement="topLeft" title={amount}>{amount}</Tooltip>
     },
     {
       title: 'Type',
       dataIndex: 'type',
       width: 100,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (type) => <Tooltip placement="topLeft" title={type}>{type}</Tooltip>
     },
     {
       title: 'Note',
       dataIndex: 'note',
       width: 100,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (note) => <Tooltip placement="topLeft" title={note}>{note}</Tooltip>
     },
     {
       title: 'Action',
       key: 'action',
       width: 200,
-      render: () => <a>Delete</a>,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: () => <Tooltip placement="topLeft" title='Delete'><a>Delete</a></Tooltip>
     },
     {
       title: 'Address',
       dataIndex: 'address',
       width: 200,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (address) => <Tooltip placement="topLeft" title={address}>{address}</Tooltip>
     },
     {
       title: 'Status',
       dataIndex: 'status',
-      width: 100,
+      width: 200,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (status) => <Tooltip placement="topLeft" title={status}>{status}</Tooltip>
     },
     {
       title: 'Upgrade Status',
       dataIndex: 'upgradeStatus',
-      width: 100,
+      width: 300,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (upgradeStatus) => <Tooltip placement="topLeft" title={upgradeStatus}>{upgradeStatus}</Tooltip>
     },
     {
       title: 'Creator',
       dataIndex: 'creator',
       width: 100,
+      ellipsis: {
+        showTitle: false,
+    },
+    render: (creator) => <Tooltip placement="topLeft" title={creator}>{creator}</Tooltip>
     },
     {
       title: 'Platform',
       dataIndex: 'platform',
       width: 200,
+      ellipsis: {
+        showTitle: false,
     },
-    {
-      title: 'Version',
-      dataIndex: 'version',
-      width: 200,
-    },
-    {
-      title: 'Upgraded',
-      dataIndex: 'upgraded',
-      width: 100,
-    },
-    {
-      title: 'Operation',
-      dataIndex: 'operation',
-      width: 100,
-      render: () => <a>Edit</a>,
-    },{}
+    render: (platform) => <Tooltip placement="topLeft" title={platform}>{platform}</Tooltip>
+    }
   ]);
 
   const data = [
@@ -149,12 +173,8 @@ const App = () => {
     },
   ];
 
-  const [colSum, setColSum] = useState(0);
-  const [isDraggingAllowed, setIsDraggingAllowed] = useState(true);
-
-  let newColSum = 0;
-  const testNum = 40
-  const testRef = useRef();
+  const tableRef = useRef();
+  const minColWidth = 25.84
 
   const handleResize = (index) => (_, { size }) => {
     setColumns((prevColumns) => {
@@ -170,23 +190,28 @@ const App = () => {
         width: size.width,
       };
 
-      prevColumns.forEach((column)=>{
-        if(column.width){
-          newColSum+=column.width
-        }
-      })      
-
-      setColSum(newColSum);
-      setIsDraggingAllowed(colSum + testNum <= testRef.current?.offsetWidth);
-
+      // 칼럼을 오른쪽으로 드래그 했을 떄
       if (isResizingRight) {
-        if(isDraggingAllowed) {
+        // 더이상 오른쪽으로 갈 수 X
+        if(newColumns[index + 1].width <= minColWidth){
+          return prevColumns
+        }
+        // 더이상 오른쪽으로 갈 수 O
+          newColumns[index + 1] = {
+            ...newColumns[index + 1],
+            width: newColumns[index + 1].width + (prevtWidth - newWidth),
+          };
           return newColumns
-    }
-        return prevColumns
+
+      // 칼럼을 왼쪽으로 드래그 했을 떄
       } else if (isResizingLeft) {
+        newColumns[index + 1] = {
+          ...newColumns[index + 1],
+          width: newColumns[index + 1].width + (prevtWidth - newWidth),
+        };
         return newColumns
       }
+      
       return newColumns;
     });
   };
@@ -200,8 +225,8 @@ const App = () => {
   }));
 
   return (
-    <Table
-     ref={testRef}
+    <Table className='ant-table'
+     ref={tableRef}
       bordered
       components={{
         header: {
@@ -210,6 +235,7 @@ const App = () => {
       }}
       columns={mergeColumns}
       dataSource={data}
+      ellipsis={true}
     />
   );
 };

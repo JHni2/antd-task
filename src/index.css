@@ -12,3 +12,18 @@
   height: 100%;
   cursor: col-resize;
 }
+
+.ant-table{
+  width: 100%;
+  min-width: 500px;
+  overflow-x: auto; 
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none
+}
+
+.ant-tooltip-placement-topLeft .ant-tooltip-arrow{
+  left: 1px !important;
+  bottom: 1px !important;
+}
