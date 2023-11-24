@@ -16,6 +16,7 @@
 .ant-table{
   width: 100%;
   min-width: 500px;
+  padding: 30px;
   overflow-x: auto; 
   -webkit-user-select:none;
   -moz-user-select:none;
