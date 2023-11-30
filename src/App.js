@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Tooltip } from 'antd'
 import { Resizable } from 'react-resizable'
 import { Table } from 'antd'
@@ -214,8 +214,6 @@ const App = () => {
   ]
 
   const [initialColWidth, setInitialColWidth] = useState([])
-  const tableRef = useRef()
-  const minColWidth = 25.84
 
   // 초기 칼럼 width
   useEffect(() => {
@@ -226,6 +224,9 @@ const App = () => {
 
     setInitialColWidth(newInitialColWidth)
   }, [])
+
+  const tableRef = useRef()
+  const minColWidth = 25.84
 
   const handleResize =
     (index) =>
@@ -247,70 +248,50 @@ const App = () => {
         if (isResizingRight) {
           // 더이상 오른쪽으로 갈 수 없어 오른쪽의 칼럼을 줄이는 동작을 수행
           let currentIndex = index + 1
-          if (newColumns[currentIndex].width <= minColWidth) {
-            console.log(currentIndex)
-            while (currentIndex < newColumns.length) {
-              newColumns[currentIndex] = {
-                ...newColumns[currentIndex],
-                width: minColWidth,
-              }
 
-              // 가장 오른쪽 칼럼의 가로 너비가 최소값을 갖도록 함
-              if (currentIndex + 1 === newColumns.length) {
-                return prevColumns
-              }
-
-              if (currentIndex + 1 < newColumns.length) {
-                newColumns[currentIndex + 1] = {
-                  ...newColumns[currentIndex + 1],
-                  width: newColumns[currentIndex + 1].width + (prevtWidth - newWidth),
-                }
-              }
-              currentIndex++
-            }
-          } else {
-            // 더이상 오른쪽으로 갈 수 O
-            let testIndex = index
-            console.log('hi')
-
-            while (
-              testIndex &&
-              testIndex < newColumns.length &&
-              newColumns[testIndex].width > initialColWidth[testIndex].width
-            ) {
-              newColumns[testIndex + 1] = {
-                ...newColumns[testIndex + 1],
-                width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
-              }
-              if (newColumns[testIndex].width > minColWidth) {
-                newColumns[testIndex - 1] = {
-                  ...newColumns[testIndex - 1],
-                  width: newColumns[testIndex - 1].width - (prevtWidth - newWidth),
-                }
-
-                testIndex--
-              }
+          while (currentIndex < newColumns.length && newColumns[currentIndex].width <= minColWidth) {
+            newColumns[currentIndex] = {
+              ...newColumns[currentIndex],
+              width: minColWidth,
             }
 
-            if (testIndex && newColumns[index].width > initialColWidth[index].width) {
-              newColumns[index + 1] = {
-                ...newColumns[index + 1],
-                width: newColumns[index + 1].width + (prevtWidth - newWidth),
-              }
-
-              newColumns[index - 1] = {
-                ...newColumns[index - 1],
-                width: newColumns[index - 1].width - (prevtWidth - newWidth),
-              }
-              // return newColumns
+            // 가장 오른쪽 칼럼의 가로 너비가 최소값을 갖도록 함
+            if (currentIndex + 1 === newColumns.length) {
+              return prevColumns
             }
 
-            newColumns[index + 1] = {
-              ...newColumns[index + 1],
-              width: newColumns[index + 1].width + (prevtWidth - newWidth),
+            if (currentIndex + 1 < newColumns.length) {
+              newColumns[currentIndex + 1] = {
+                ...newColumns[currentIndex + 1],
+                width: newColumns[currentIndex + 1].width + (prevtWidth - newWidth),
+              }
             }
-            return newColumns
+            currentIndex++
           }
+
+          // 더이상 오른쪽으로 갈 수 O
+          newColumns[index + 1] = {
+            ...newColumns[index + 1],
+            width: newColumns[index + 1].width + (prevtWidth - newWidth),
+          }
+
+          // 늘렸을 때 옆 칼럼 따라오기
+          let testIndex = index
+
+          while (testIndex - 1 >= 0 && newColumns[testIndex].width >= initialColWidth[testIndex].width) {
+            newColumns[testIndex + 1] = {
+              ...newColumns[testIndex + 1],
+              width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
+            }
+
+            newColumns[testIndex - 1] = {
+              ...newColumns[testIndex - 1],
+              width: newColumns[testIndex - 1].width - (prevtWidth - newWidth),
+            }
+            testIndex--
+          }
+
+          return newColumns
 
           // 칼럼을 왼쪽으로 드래그 했을 떄
         } else if (isResizingLeft) {
@@ -343,7 +324,23 @@ const App = () => {
             ...newColumns[index + 1],
             width: newColumns[index + 1].width + (prevtWidth - newWidth),
           }
-          return newColumns
+
+          // 늘렸을 때 옆 칼럼 따라오기
+          let testIndex = index + 1
+
+          while (initialColWidth[testIndex] && newColumns[testIndex - 1].width >= initialColWidth[testIndex].width) {
+            newColumns[testIndex] = {
+              ...newColumns[testIndex],
+              width: newColumns[testIndex].width + (prevtWidth - newWidth),
+            }
+
+            newColumns[testIndex - 1] = {
+              ...newColumns[testIndex - 1],
+              width: newColumns[testIndex - 1].width - (prevtWidth - newWidth),
+            }
+
+            testIndex++
+          }
         }
 
         return newColumns
