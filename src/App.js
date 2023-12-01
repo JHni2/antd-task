@@ -277,6 +277,21 @@ const App = () => {
             whileLoopExecuted = true
           }
 
+          if (
+            newColumns[index].width >= initialColWidth[index].width &&
+            newColumns[index - 1].width <= initialColWidth[index - 1].width
+          ) {
+            newColumns[index - 1] = {
+              ...newColumns[index - 1],
+              width: newColumns[index - 1].width - (prevtWidth - newWidth),
+            }
+
+            newColumns[index] = {
+              ...newColumns[index],
+              width: newColumns[index].width + (prevtWidth - newWidth),
+            }
+          }
+
           // 더이상 오른쪽으로 갈 수 O
           if (!whileLoopExecuted && newColumns[index + 1]) {
             newColumns[index + 1] = {
@@ -323,6 +338,22 @@ const App = () => {
             newColumns[index + 1] = {
               ...newColumns[index + 1],
               width: newColumns[index + 1].width + (prevtWidth - newWidth),
+            }
+          }
+
+          if (
+            newColumns[index + 2] &&
+            newColumns[index + 1].width >= initialColWidth[index + 1].width &&
+            newColumns[index + 2].width <= initialColWidth[index + 2].width
+          ) {
+            newColumns[index + 2] = {
+              ...newColumns[index + 2],
+              width: newColumns[index + 2].width + (prevtWidth - newWidth),
+            }
+
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: newColumns[index + 1].width - (prevtWidth - newWidth),
             }
           }
 
