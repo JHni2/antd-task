@@ -277,7 +277,9 @@ const App = () => {
             whileLoopExecuted = true
           }
 
+          // 바로 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
           if (
+            newColumns[index - 1] &&
             newColumns[index].width >= initialColWidth[index].width &&
             newColumns[index - 1].width <= initialColWidth[index - 1].width
           ) {
@@ -286,9 +288,9 @@ const App = () => {
               width: newColumns[index - 1].width - (prevtWidth - newWidth),
             }
 
-            newColumns[index] = {
-              ...newColumns[index],
-              width: newColumns[index].width + (prevtWidth - newWidth),
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: newColumns[index + 1].width + (prevtWidth - newWidth),
             }
           }
 
@@ -341,8 +343,10 @@ const App = () => {
             }
           }
 
+          // 바로 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
           if (
             newColumns[index + 2] &&
+            newColumns[index].width >= minColWidth &&
             newColumns[index + 1].width >= initialColWidth[index + 1].width &&
             newColumns[index + 2].width <= initialColWidth[index + 2].width
           ) {
