@@ -254,7 +254,6 @@ const TableComponent = () => {
     }
 
     return () => {
-      // Cleanup: remove the event listener when the component unmounts or isDrag changes
       window.removeEventListener('mousemove', throttledGetMouseDirection)
     }
   }, [isDrag])
@@ -279,7 +278,6 @@ const TableComponent = () => {
     (_, { size }) => {
       setColumns((prevColumns) => {
         const newColumns = [...prevColumns]
-        const newColLenghts = newColumns.length
         const prevtWidth = newColumns[index].width || 0
         const newWidth = size.width
 
@@ -290,141 +288,24 @@ const TableComponent = () => {
 
         // 칼럼을 오른쪽으로 드래그 했을 떄
         if (dragDir === 'right') {
-          let currentIndex = index + 1
-          let whileLoopExecuted = false
-
-          // 더이상 오른쪽으로 갈 수 없어 오른쪽의 칼럼을 줄이는 동작을 수행
-          while (
-            newColumns[index + 1] &&
-            currentIndex <= newColLenghts &&
-            newColumns[currentIndex].width <= minColWidth
-          ) {
-            // 가장 오른쪽 칼럼의 가로 너비가 최소값을 갖도록 함
-            if (currentIndex + 1 === newColLenghts) {
-              return prevColumns
-            }
-            console.log('오른쪽, 미는 중')
-
-            newColumns[currentIndex] = {
-              ...newColumns[currentIndex],
-              width: minColWidth,
-            }
-
-            newColumns[currentIndex + 1] = {
-              ...newColumns[currentIndex + 1],
-              width: newColumns[currentIndex + 1].width + (prevtWidth - newWidth),
-            }
-
-            currentIndex++
-            whileLoopExecuted = true
+          // 더이상 오른쪽으로 갈 수 X
+          if (newColumns[index + 1].width <= minColWidth) {
+            return prevColumns
           }
-
-          // 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
-          let testIndex = index
-          while (
-            newColumns[testIndex - 1] &&
-            newColumns[testIndex + 1].width >= minColWidth &&
-            newColumns[testIndex].width >= initialColWidth[testIndex].width &&
-            testIndex - 1 >= 0 &&
-            newColumns[0].width <= initialColWidth[0].width
-          ) {
-            testIndex--
-          }
-
           // 더이상 오른쪽으로 갈 수 O
-          if (!whileLoopExecuted && newColumns[testIndex] && newColumns[index].width > minColWidth + 3) {
-            console.log('오른쪽, 안 미는 중')
-
-            if (testIndex !== index) {
-              newColumns[testIndex] = {
-                ...newColumns[testIndex],
-                width: newColumns[testIndex].width - (prevtWidth - newWidth),
-              }
-              newColumns[testIndex + 1] = {
-                ...newColumns[testIndex + 1],
-                width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
-              }
-            } else {
-              newColumns[testIndex] = {
-                ...newColumns[testIndex],
-                width: newColumns[testIndex].width - (prevtWidth - newWidth) * 0.1,
-              }
-            }
-
-            newColumns[testIndex + 1] = {
-              ...newColumns[testIndex + 1],
-              width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
-            }
+          newColumns[index + 1] = {
+            ...newColumns[index + 1],
+            width: newColumns[index + 1].width + (prevtWidth - newWidth),
           }
-
           return newColumns
 
           // 칼럼을 왼쪽으로 드래그 했을 떄
         } else if (dragDir === 'left') {
-          // 더이상 왼쪽으로 갈 수 없어 왼쪽의 칼럼을 줄이는 동작을 수행
-          let currentIndex = index
-          let whileLoopExecuted = false
-
-          while (
-            newColumns[index + 1] &&
-            currentIndex <= newColLenghts &&
-            newColumns[currentIndex].width <= minColWidth
-          ) {
-            // 가장 왼쪽 칼럼의 가로 너비가 최소값을 갖도록 함
-            if (currentIndex === 0) {
-              return prevColumns
-            }
-            console.log('왼쪽, 미는 중')
-
-            if (newColumns[currentIndex].width <= minColWidth) {
-              newColumns[currentIndex] = {
-                ...newColumns[currentIndex],
-                width: minColWidth,
-              }
-            } else {
-              newColumns[currentIndex] = {
-                ...newColumns[currentIndex],
-                width: newColumns[currentIndex].width,
-              }
-            }
-
-            if (newColumns[currentIndex - 1].width >= minColWidth + 3) {
-              newColumns[index + 1] = {
-                ...newColumns[index + 1],
-                width: newColumns[index + 1].width + (prevtWidth - newWidth),
-              }
-            }
-
-            newColumns[currentIndex - 1] = {
-              ...newColumns[currentIndex - 1],
-              width: newColumns[currentIndex - 1].width - (prevtWidth - newWidth),
-            }
-
-            currentIndex--
-            whileLoopExecuted = true
+          newColumns[index + 1] = {
+            ...newColumns[index + 1],
+            width: newColumns[index + 1].width + (prevtWidth - newWidth),
           }
-
-          // 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
-          let testIndex = index
-          while (
-            newColumns[testIndex + 2] &&
-            newColumns[testIndex].width >= minColWidth &&
-            newColumns[testIndex + 1].width >= initialColWidth[testIndex + 1].width &&
-            testIndex + 2 <= newColLenghts &&
-            newColumns[newColLenghts - 1].width <= initialColWidth[newColLenghts - 1].width
-          ) {
-            testIndex++
-          }
-
-          // 더이상 왼쪽으로 갈 수 O
-          if (!whileLoopExecuted && newColumns[testIndex + 1] && newColumns[testIndex].width > minColWidth + 3) {
-            console.log('왼쪽, 안 미는 중')
-
-            newColumns[testIndex + 1] = {
-              ...newColumns[testIndex + 1],
-              width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
-            }
-          }
+          return newColumns
         }
 
         return newColumns
