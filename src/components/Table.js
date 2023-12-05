@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Tooltip } from 'antd'
 import { Resizable } from 'react-resizable'
 import { Table } from 'antd'
+import { useDrag } from '../contexts/DragContext'
 
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props
+  const { setDragState } = useDrag()
 
   if (!width) {
     return <th {...restProps} />
@@ -23,6 +25,8 @@ const ResizableTitle = (props) => {
         />
       }
       onResize={onResize}
+      onResizeStart={(e) => setDragState(true)}
+      onResizeStop={(e) => setDragState(false)}
       draggableOpts={{
         enableUserSelectHack: false,
       }}
@@ -30,6 +34,19 @@ const ResizableTitle = (props) => {
       <th {...restProps} />
     </Resizable>
   )
+}
+
+function throttle(func, delay) {
+  let lastTime = 0
+
+  return function (event) {
+    const currentTime = new Date().getTime()
+
+    if (currentTime - lastTime > delay) {
+      func(event)
+      lastTime = currentTime
+    }
+  }
 }
 
 const TableComponent = () => {
@@ -212,6 +229,36 @@ const TableComponent = () => {
     },
   ]
 
+  const { isDrag } = useDrag(false)
+  const [dragDir, setDragDir] = useState('')
+
+  if (isDrag) {
+  }
+
+  const prevX = useRef(0)
+
+  useEffect(() => {
+    const getMouseDirection = (event) => {
+      const xDir = prevX.current <= event.pageX ? 'right' : 'left'
+      prevX.current = event.pageX
+
+      setDragDir(xDir)
+    }
+
+    const throttledGetMouseDirection = throttle(getMouseDirection, 50)
+
+    if (isDrag) {
+      window.addEventListener('mousemove', throttledGetMouseDirection)
+    } else {
+      window.removeEventListener('mousemove', throttledGetMouseDirection)
+    }
+
+    return () => {
+      // Cleanup: remove the event listener when the component unmounts or isDrag changes
+      window.removeEventListener('mousemove', throttledGetMouseDirection)
+    }
+  }, [isDrag])
+
   const [initialColWidth, setInitialColWidth] = useState([])
 
   // 초기 칼럼 width
@@ -236,24 +283,20 @@ const TableComponent = () => {
         const prevtWidth = newColumns[index].width || 0
         const newWidth = size.width
 
-        const isResizingRight = newWidth > prevtWidth
-        const isResizingLeft = newWidth < prevtWidth
-
         newColumns[index] = {
           ...newColumns[index],
           width: size.width,
         }
 
         // 칼럼을 오른쪽으로 드래그 했을 떄
-        if (isResizingRight) {
+        if (dragDir === 'right') {
           let currentIndex = index + 1
-          let testBoolean = false
           let whileLoopExecuted = false
 
           // 더이상 오른쪽으로 갈 수 없어 오른쪽의 칼럼을 줄이는 동작을 수행
           while (
             newColumns[index + 1] &&
-            currentIndex < newColLenghts &&
+            currentIndex <= newColLenghts &&
             newColumns[currentIndex].width <= minColWidth
           ) {
             // 가장 오른쪽 칼럼의 가로 너비가 최소값을 갖도록 함
@@ -274,7 +317,6 @@ const TableComponent = () => {
 
             currentIndex++
             whileLoopExecuted = true
-            testBoolean = true
           }
 
           // 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
@@ -290,13 +332,23 @@ const TableComponent = () => {
           }
 
           // 더이상 오른쪽으로 갈 수 O
-          if (!whileLoopExecuted && newColumns[testIndex] && newColumns[testIndex].width > minColWidth + 3) {
+          if (!whileLoopExecuted && newColumns[testIndex] && newColumns[index].width > minColWidth + 3) {
             console.log('오른쪽, 안 미는 중')
-            console.log(newColumns[testIndex].width, minColWidth)
 
-            newColumns[testIndex] = {
-              ...newColumns[testIndex],
-              width: newColumns[testIndex].width - (prevtWidth - newWidth),
+            if (testIndex !== index) {
+              newColumns[testIndex] = {
+                ...newColumns[testIndex],
+                width: newColumns[testIndex].width - (prevtWidth - newWidth),
+              }
+              newColumns[testIndex + 1] = {
+                ...newColumns[testIndex + 1],
+                width: newColumns[testIndex + 1].width + (prevtWidth - newWidth),
+              }
+            } else {
+              newColumns[testIndex] = {
+                ...newColumns[testIndex],
+                width: newColumns[testIndex].width - (prevtWidth - newWidth) * 0.1,
+              }
             }
 
             newColumns[testIndex + 1] = {
@@ -308,37 +360,48 @@ const TableComponent = () => {
           return newColumns
 
           // 칼럼을 왼쪽으로 드래그 했을 떄
-        } else if (isResizingLeft) {
+        } else if (dragDir === 'left') {
           // 더이상 왼쪽으로 갈 수 없어 왼쪽의 칼럼을 줄이는 동작을 수행
           let currentIndex = index
           let whileLoopExecuted = false
-          let testBoolean = false
 
           while (
             newColumns[index + 1] &&
-            currentIndex < newColLenghts &&
+            currentIndex <= newColLenghts &&
             newColumns[currentIndex].width <= minColWidth
           ) {
             // 가장 왼쪽 칼럼의 가로 너비가 최소값을 갖도록 함
             if (currentIndex === 0) {
               return prevColumns
             }
-            console.log(newColumns[currentIndex].width, newColumns[currentIndex])
             console.log('왼쪽, 미는 중')
+
+            if (newColumns[currentIndex].width <= minColWidth) {
+              newColumns[currentIndex] = {
+                ...newColumns[currentIndex],
+                width: minColWidth,
+              }
+            } else {
+              newColumns[currentIndex] = {
+                ...newColumns[currentIndex],
+                width: newColumns[currentIndex].width,
+              }
+            }
+
+            if (newColumns[currentIndex - 1].width >= minColWidth + 3) {
+              newColumns[index + 1] = {
+                ...newColumns[index + 1],
+                width: newColumns[index + 1].width + (prevtWidth - newWidth),
+              }
+            }
 
             newColumns[currentIndex - 1] = {
               ...newColumns[currentIndex - 1],
               width: newColumns[currentIndex - 1].width - (prevtWidth - newWidth),
             }
 
-            newColumns[currentIndex] = {
-              ...newColumns[currentIndex],
-              width: minColWidth,
-            }
-
             currentIndex--
             whileLoopExecuted = true
-            testBoolean = true
           }
 
           // 옆 칼럼이 말줄임표가 됐을 경우 늘어나기
@@ -355,7 +418,6 @@ const TableComponent = () => {
 
           // 더이상 왼쪽으로 갈 수 O
           if (!whileLoopExecuted && newColumns[testIndex + 1] && newColumns[testIndex].width > minColWidth + 3) {
-            console.log(newColumns[testIndex], minColWidth)
             console.log('왼쪽, 안 미는 중')
 
             newColumns[testIndex + 1] = {
