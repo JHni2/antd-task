@@ -58,6 +58,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (date) => (
+        <Tooltip placement="topLeft" title={date}>
+          {date}
+        </Tooltip>
+      ),
     },
     {
       title: 'Amount',
@@ -67,6 +72,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (amount) => (
+        <Tooltip placement="topLeft" title={amount}>
+          {amount}
+        </Tooltip>
+      ),
     },
     {
       title: 'Type',
@@ -75,6 +85,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (type) => (
+        <Tooltip placement="topLeft" title={type}>
+          {type}
+        </Tooltip>
+      ),
     },
     {
       title: 'Note',
@@ -83,6 +98,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (note) => (
+        <Tooltip placement="topLeft" title={note}>
+          {note}
+        </Tooltip>
+      ),
     },
     {
       title: 'Action',
@@ -91,6 +111,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: () => (
+        <Tooltip placement="topLeft" title="Delete">
+          <a>Delete</a>
+        </Tooltip>
+      ),
     },
     {
       title: 'Address',
@@ -99,6 +124,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (address) => (
+        <Tooltip placement="topLeft" title={address}>
+          {address}
+        </Tooltip>
+      ),
     },
     {
       title: 'Status',
@@ -107,6 +137,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (status) => (
+        <Tooltip placement="topLeft" title={status}>
+          {status}
+        </Tooltip>
+      ),
     },
     {
       title: 'Upgrade Status',
@@ -115,6 +150,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (upgradeStatus) => (
+        <Tooltip placement="topLeft" title={upgradeStatus}>
+          {upgradeStatus}
+        </Tooltip>
+      ),
     },
     {
       title: 'Creator',
@@ -123,6 +163,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (creator) => (
+        <Tooltip placement="topLeft" title={creator}>
+          {creator}
+        </Tooltip>
+      ),
     },
     {
       title: 'Platform',
@@ -131,6 +176,11 @@ const TableComponent = () => {
       ellipsis: {
         showTitle: false,
       },
+      render: (platform) => (
+        <Tooltip placement="topLeft" title={platform}>
+          {platform}
+        </Tooltip>
+      ),
     },
   ])
 
@@ -181,7 +231,6 @@ const TableComponent = () => {
 
   const { isDrag } = useDrag(false)
   const [dragDir, setDragDir] = useState('')
-  const [dragVal, setDragVal] = useState()
 
   const prevX = useRef(0)
 
@@ -192,8 +241,6 @@ const TableComponent = () => {
       prevX.current = event.pageX
 
       setDragDir(xDir)
-
-      if (event.pageX !== dx) setDragVal(dx)
     }
 
     const throttledGetMouseDirection = throttle(getMouseDirection, 0)
@@ -210,7 +257,6 @@ const TableComponent = () => {
   }, [isDrag])
 
   const tableRef = useRef()
-  const minColWidth = 20
 
   const handleResize =
     (index) =>
