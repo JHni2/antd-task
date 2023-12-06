@@ -54,7 +54,7 @@ const TableComponent = () => {
     {
       title: 'Date',
       dataIndex: 'date',
-      width: 200,
+      width: 150,
       ellipsis: {
         showTitle: false,
       },
@@ -146,7 +146,7 @@ const TableComponent = () => {
     {
       title: 'Upgrade Status',
       dataIndex: 'upgradeStatus',
-      width: 300,
+      width: 250,
       ellipsis: {
         showTitle: false,
       },
@@ -172,7 +172,7 @@ const TableComponent = () => {
     {
       title: 'Platform',
       dataIndex: 'platform',
-      width: 200,
+      width: 100,
       ellipsis: {
         showTitle: false,
       },
@@ -232,9 +232,6 @@ const TableComponent = () => {
   const { isDrag } = useDrag(false)
   const [dragDir, setDragDir] = useState('')
 
-  if (isDrag) {
-  }
-
   const prevX = useRef(0)
 
   useEffect(() => {
@@ -258,20 +255,8 @@ const TableComponent = () => {
     }
   }, [isDrag])
 
-  const [initialColWidth, setInitialColWidth] = useState([])
-
-  // 초기 칼럼 width
-  useEffect(() => {
-    const newInitialColWidth = columns.map((column) => ({
-      title: column.dataIndex,
-      width: column.width,
-    }))
-
-    setInitialColWidth(newInitialColWidth)
-  }, [])
-
   const tableRef = useRef()
-  const minColWidth = 25.84
+  const minColWidth = 20
 
   const handleResize =
     (index) =>
@@ -280,6 +265,7 @@ const TableComponent = () => {
         const newColumns = [...prevColumns]
         const prevtWidth = newColumns[index].width || 0
         const newWidth = size.width
+        const wDiff = prevtWidth - newWidth
 
         newColumns[index] = {
           ...newColumns[index],
@@ -289,22 +275,22 @@ const TableComponent = () => {
         // 칼럼을 오른쪽으로 드래그 했을 떄
         if (dragDir === 'right') {
           // 더이상 오른쪽으로 갈 수 X
-          if (newColumns[index + 1].width <= minColWidth) {
-            return prevColumns
+          if (newColumns[index + 1] && newColumns[index + 1].width <= minColWidth) {
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: minColWidth,
+            }
           }
-          // 더이상 오른쪽으로 갈 수 O
-          newColumns[index + 1] = {
-            ...newColumns[index + 1],
-            width: newColumns[index + 1].width + (prevtWidth - newWidth),
-          }
+
           return newColumns
 
           // 칼럼을 왼쪽으로 드래그 했을 떄
         } else if (dragDir === 'left') {
           newColumns[index + 1] = {
             ...newColumns[index + 1],
-            width: newColumns[index + 1].width + (prevtWidth - newWidth),
+            width: newColumns[index + 1].width + wDiff,
           }
+
           return newColumns
         }
 
