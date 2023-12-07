@@ -32,10 +32,11 @@
 }
 
 .ant-table-wrapper {
-  width: 1400px !important;
+  width: 1383px !important;
   margin: auto;
 }
 
-.ant-tooltip {
-  box-sizing: content-box;
+.nav {
+  display: flex;
+  justify-content: center;
 }

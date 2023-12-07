@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { Table } from 'antd'
 import { Tooltip } from 'antd'
 import { Resizable } from 'react-resizable'
-import { Table } from 'antd'
 import { useDrag } from '../contexts/DragContext'
+import GoToComponent from './GoTo.js'
 
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props
@@ -107,7 +108,7 @@ const TableComponent = () => {
     {
       title: 'Action',
       key: 'action',
-      width: 200,
+      width: 100,
       ellipsis: {
         showTitle: false,
       },
@@ -133,7 +134,7 @@ const TableComponent = () => {
     {
       title: 'Status',
       dataIndex: 'status',
-      width: 200,
+      width: 150,
       ellipsis: {
         showTitle: false,
       },
@@ -231,6 +232,17 @@ const TableComponent = () => {
 
   const { isDrag } = useDrag(false)
   const [dragDir, setDragDir] = useState('')
+  const [initialColWidth, setInitialColWidth] = useState([])
+
+  // 초기 칼럼 width
+  useEffect(() => {
+    const newInitialColWidth = columns.map((column) => ({
+      title: column.dataIndex,
+      width: column.width,
+    }))
+
+    setInitialColWidth(newInitialColWidth)
+  }, [])
 
   const prevX = useRef(0)
 
@@ -243,7 +255,7 @@ const TableComponent = () => {
       setDragDir(xDir)
     }
 
-    const throttledGetMouseDirection = throttle(getMouseDirection, 0)
+    const throttledGetMouseDirection = throttle(getMouseDirection, 50)
 
     if (isDrag) {
       window.addEventListener('mousemove', throttledGetMouseDirection)
@@ -257,6 +269,7 @@ const TableComponent = () => {
   }, [isDrag])
 
   const tableRef = useRef()
+  const tableContent = document.getElementsByClassName('ant-table-content')
 
   const handleResize =
     (index) =>
@@ -274,12 +287,20 @@ const TableComponent = () => {
 
         // 칼럼을 왼쪽으로 드래그 했을 떄
         if (dragDir === 'left') {
+          // 늘린 후에 줄일 때
+          if (tableContent[0]?.clientWidth < tableContent[0]?.scrollWidth) {
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: newColumns[index + 1].width,
+            }
+            return newColumns
+          }
+
+          // 그냥 줄일 때
           newColumns[index + 1] = {
             ...newColumns[index + 1],
             width: newColumns[index + 1].width + wDiff,
           }
-
-          return newColumns
         }
 
         return newColumns
@@ -295,19 +316,22 @@ const TableComponent = () => {
   }))
 
   return (
-    <Table
-      className="ant-table"
-      ref={tableRef}
-      bordered
-      components={{
-        header: {
-          cell: ResizableTitle,
-        },
-      }}
-      columns={mergeColumns}
-      dataSource={data}
-      ellipsis={true}
-    />
+    <>
+      <GoToComponent component="chart" />
+      <Table
+        className="ant-table"
+        ref={tableRef}
+        bordered
+        components={{
+          header: {
+            cell: ResizableTitle,
+          },
+        }}
+        columns={mergeColumns}
+        dataSource={data}
+        ellipsis={true}
+      />
+    </>
   )
 }
 
