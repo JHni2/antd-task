@@ -37,7 +37,7 @@ const ResizableTitle = (props) => {
   )
 }
 
-function throttle(func, delay) {
+const throttle = (func, delay) => {
   let lastTime = 0
 
   return function (event) {
@@ -121,7 +121,7 @@ const TableComponent = () => {
     {
       title: 'Address',
       dataIndex: 'address',
-      width: 200,
+      width: 250,
       ellipsis: {
         showTitle: false,
       },
@@ -134,7 +134,7 @@ const TableComponent = () => {
     {
       title: 'Status',
       dataIndex: 'status',
-      width: 150,
+      width: 100,
       ellipsis: {
         showTitle: false,
       },
@@ -232,30 +232,20 @@ const TableComponent = () => {
 
   const { isDrag } = useDrag(false)
   const [dragDir, setDragDir] = useState('')
-  const [initialColWidth, setInitialColWidth] = useState([])
-
-  // 초기 칼럼 width
-  useEffect(() => {
-    const newInitialColWidth = columns.map((column) => ({
-      title: column.dataIndex,
-      width: column.width,
-    }))
-
-    setInitialColWidth(newInitialColWidth)
-  }, [])
-
   const prevX = useRef(0)
+  const error = 100
 
+  // 드래그 방향 알아내는 함수
   useEffect(() => {
     const getMouseDirection = (event) => {
       const dx = event.pageX - prevX.current
-      const xDir = dx > 0 ? 'right' : 'left'
+      const xDir = dx <= 0 || dx > error ? 'left' : 'right'
       prevX.current = event.pageX
 
       setDragDir(xDir)
     }
 
-    const throttledGetMouseDirection = throttle(getMouseDirection, 50)
+    const throttledGetMouseDirection = throttle(getMouseDirection, 30)
 
     if (isDrag) {
       window.addEventListener('mousemove', throttledGetMouseDirection)
@@ -268,9 +258,9 @@ const TableComponent = () => {
     }
   }, [isDrag])
 
-  const tableRef = useRef()
   const tableContent = document.getElementsByClassName('ant-table-content')
 
+  // 표 리사이징하는 함수
   const handleResize =
     (index) =>
     (_, { size }) => {
@@ -285,21 +275,32 @@ const TableComponent = () => {
           width: size.width,
         }
 
-        // 칼럼을 왼쪽으로 드래그 했을 떄
+        // 왼쪽으로 드래그할 때
         if (dragDir === 'left') {
-          // 늘린 후에 줄일 때
+          // overflow 됐을 때 칼럼 줄이기
           if (tableContent[0]?.clientWidth < tableContent[0]?.scrollWidth) {
+            // 마지막 index인 경우
+            if (!newColumns[index + 1]) {
+              return newColumns
+            }
+
             newColumns[index + 1] = {
               ...newColumns[index + 1],
               width: newColumns[index + 1].width,
             }
-            return newColumns
-          }
 
-          // 그냥 줄일 때
-          newColumns[index + 1] = {
-            ...newColumns[index + 1],
-            width: newColumns[index + 1].width + wDiff,
+            return newColumns
+          } else {
+            // overflow 되지 않았을 때 칼럼 줄이기 - 마지막 index인 경우
+            if (!newColumns[index + 1]) {
+              return prevColumns
+            }
+
+            // overflow 되지 않을 때 칼럼 줄이기 - 일반 index인 경우
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: newColumns[index + 1].width + wDiff,
+            }
           }
         }
 
@@ -320,7 +321,6 @@ const TableComponent = () => {
       <GoToComponent component="chart" />
       <Table
         className="ant-table"
-        ref={tableRef}
         bordered
         components={{
           header: {
