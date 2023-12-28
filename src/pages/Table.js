@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Table } from 'antd'
 import { Tooltip } from 'antd'
 import { Resizable } from 'react-resizable'
-import { useDrag } from '../contexts/DragContext'
-import GoToComponent from './GoTo.js'
+import { useDrag } from '../contexts/DragContext.js'
+import GoToHome from '../components/utils/GoTo.js'
 
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props
@@ -50,7 +50,7 @@ const throttle = (func, delay) => {
   }
 }
 
-const TableComponent = () => {
+const TablePage = () => {
   const [columns, setColumns] = useState([
     {
       title: 'Date',
@@ -318,7 +318,7 @@ const TableComponent = () => {
 
   return (
     <>
-      <GoToComponent component="chart" />
+      <GoToHome />
       <Table
         className="ant-table"
         bordered
@@ -335,4 +335,4 @@ const TableComponent = () => {
   )
 }
 
-export default TableComponent
+export default TablePage

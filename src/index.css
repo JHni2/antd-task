@@ -40,3 +40,11 @@
   display: flex;
   justify-content: center;
 }
+
+.text-bold {
+  font-weight: bold;
+}
+
+.home-align {
+  text-align: center;
+}

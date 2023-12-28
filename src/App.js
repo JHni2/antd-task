@@ -1,17 +1,19 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
-import HomeComponent from './components/Home'
-import TableComponent from './components/Table'
-import ChartComponent from './components/Chart'
+import HomePage from './pages/Home'
+import TablePage from './pages/Table'
+import ChartPage from './pages/Chart'
+import RegExPage from './pages/RegEx'
 import './index.css'
 
 const App = () => {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<HomeComponent />}></Route>
-        <Route path="/table" element={<TableComponent />}></Route>
-        <Route path="/chart" element={<ChartComponent />}></Route>
+        <Route path="/" element={<HomePage />}></Route>
+        <Route path="/table" element={<TablePage />}></Route>
+        <Route path="/chart" element={<ChartPage />}></Route>
+        <Route path="/regEx" element={<RegExPage />}></Route>
       </Routes>
     </div>
   )
