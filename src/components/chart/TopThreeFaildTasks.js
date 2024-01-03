@@ -4,7 +4,8 @@ import { Column } from '@ant-design/plots'
 
 const TopThreeFaildTasks = () => {
   const [data, setData] = useState(failData)
-  const [state, setState] = useState(false)
+  const [resetState, setResetState] = useState(false)
+  const [showTable, setShowTable] = useState(false)
 
   const resetSubjectCount = () => {
     const updatedData = data.map((data) => ({
@@ -13,7 +14,7 @@ const TopThreeFaildTasks = () => {
     }))
 
     setData(updatedData)
-    setState(true)
+    setResetState(true)
   }
 
   const result = Object.values(
@@ -51,11 +52,12 @@ const TopThreeFaildTasks = () => {
       return false
     })
     setData(topThreeData)
+    setShowTable(true)
   }
 
   useEffect(() => {
-    getTopThree()
-  }, [state])
+    resetState && getTopThree()
+  }, [resetState])
 
   useEffect(() => {
     resetSubjectCount()
@@ -68,9 +70,7 @@ const TopThreeFaildTasks = () => {
     yField: 'SubjectCount',
     seriesField: 'WorkType',
     label: {
-      position: 'mIPdle',
-      // 'top', 'bottom', 'mIPdle'
-
+      textBaseline: 'bottom',
       layout: [
         {
           type: 'interval-adjust-position',
@@ -85,11 +85,7 @@ const TopThreeFaildTasks = () => {
     },
   }
 
-  return (
-    <>
-      <Column {...config} />
-    </>
-  )
+  return <>{showTable && <Column {...config} />}</>
 }
 
 export default TopThreeFaildTasks
