@@ -35,24 +35,14 @@ const RegExPage = () => {
   }
 
   const is_valid_ipv6_addr = (_target) => {
-    return /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/.test(_target)
+    return /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/.test(
+      _target,
+    )
   }
 
   const is_valid_ipv46_addr = (_target) => {
     return is_valid_ipv4_addr(_target) || is_valid_ipv6_addr(_target)
   }
-
-  useEffect(() => {
-    is_valid_ipv4_addr(ipv4InputVal) && setIpv4IsValid(true)
-  }, [ipv4InputVal])
-
-  useEffect(() => {
-    is_valid_ipv6_addr(ipv6InputVal) && setIpv6IsValid(true)
-  }, [ipv6InputVal])
-
-  useEffect(() => {
-    is_valid_ipv46_addr(ipv46InputVal) && setIpv46IsValid(true)
-  }, [ipv46InputVal])
 
   return (
     <>
