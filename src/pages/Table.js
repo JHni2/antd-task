@@ -260,6 +260,18 @@ const TablePage = () => {
 
   const tableContent = document.getElementsByClassName('ant-table-content')
 
+  const [initialColWidth, setInitialColWidth] = useState([])
+
+  // 초기 칼럼 width
+  useEffect(() => {
+    const newInitialColWidth = columns.map((column) => ({
+      title: column.dataIndex,
+      width: column.width,
+    }))
+
+    setInitialColWidth(newInitialColWidth)
+  }, [])
+
   // 표 리사이징하는 함수
   const handleResize =
     (index) =>
@@ -269,6 +281,7 @@ const TablePage = () => {
         const prevtWidth = newColumns[index].width || 0
         const newWidth = size.width
         const wDiff = prevtWidth - newWidth
+        const minWidth = 20
 
         newColumns[index] = {
           ...newColumns[index],
@@ -301,6 +314,25 @@ const TablePage = () => {
               ...newColumns[index + 1],
               width: newColumns[index + 1].width + wDiff,
             }
+          }
+        } else {
+          if (newColumns[index].width <= initialColWidth[index].width) {
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: newColumns[index + 1].width + wDiff,
+            }
+          }
+
+          if (newColumns[index + 1].width <= minWidth) {
+            newColumns[index + 1] = {
+              ...newColumns[index + 1],
+              width: minWidth,
+            }
+
+            // newColumns[index + 1] = {
+            //   ...newColumns[index + 1],
+            //   width: minWidth,
+            // }
           }
         }
 
